@@ -36,7 +36,127 @@ business_counts = (
     .reset_index(name="business_count")
 )
 
+import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point
+import numpy as np
+import statsmodels.formula.api as smf
+import matplotlib.pyplot as plt
 
+# ---------------------------------------------------------
+# 1. LOAD BUSINESS DATA + QUICK INSPECTION
+# ---------------------------------------------------------
+biz = pd.read_csv("/Users/sayidibekova/Desktop/Individual Project_Urban/Chicago_cleaned_business_data.csv")
+
+print("Columns in biz:")
+print(biz.columns)
+
+print("\nSample rows:")
+print(biz.head())
+
+# Look at a few likely columns for business type
+possible_cols = ["BUSINESS_TYPE", "LICENSE_DESCRIPTION", "BUSINESS_ACTIVITY", "BUSINESS_CATEGORY"]
+for c in possible_cols:
+    if c in biz.columns:
+        print(f"\nValue counts for {c}:")
+        print(biz[c].value_counts().head(20))
+
+
+import matplotlib.pyplot as plt
+
+# ---------------------------------------------------------
+# HISTOGRAM / BAR CHART OF BUSINESS ACTIVITY
+# ---------------------------------------------------------
+
+# Use the correct column
+business_col = "BUSINESS ACTIVITY"
+
+# Count categories
+activity_counts = (
+    biz[business_col]
+    .dropna()
+    .value_counts()
+)
+
+# Choose how many categories to show
+top_n = 20
+activity_top = activity_counts.head(top_n)
+
+plt.figure(figsize=(12, 8), dpi=150)
+
+activity_top.sort_values().plot(
+    kind="barh",
+    color="steelblue"
+)
+
+plt.title(f"Top {top_n} Business Activities in Chicago", fontsize=15)
+plt.xlabel("Number of Businesses", fontsize=13)
+plt.ylabel("Business Activity", fontsize=13)
+plt.tight_layout()
+plt.show()
+
+# Identify top 5 business activities
+top5 = (
+    biz["BUSINESS ACTIVITY"]
+    .dropna()
+    .value_counts()
+    .head(5)
+)
+
+print("Top 5 business types:")
+print(top5)
+
+import matplotlib.pyplot as plt
+
+# ---------------------------------------------------------
+# 1. Identify top 5 business types
+# ---------------------------------------------------------
+top5 = (
+    biz["BUSINESS ACTIVITY"]
+    .dropna()
+    .value_counts()
+    .head(5)
+)
+
+top5_list = list(top5.index)
+print("Top 5 business types:", top5_list)
+
+# ---------------------------------------------------------
+# 2. Define symbols + colors for each type
+# ---------------------------------------------------------
+markers = ["o", "^", "s", "P", "X"]   # circle, triangle, square, plus, X
+colors = ["red", "blue", "green", "purple", "orange"]
+
+# ---------------------------------------------------------
+# 3. Plot everything on one map
+# ---------------------------------------------------------
+fig, ax = plt.subplots(figsize=(12, 12))
+
+# Plot Chicago tracts
+tracts.plot(
+    ax=ax,
+    color="lightgrey",
+    edgecolor="white",
+    linewidth=0.3
+)
+
+# Plot each business type with a unique symbol + color
+for i, activity in enumerate(top5_list):
+    subset = joined[joined["BUSINESS ACTIVITY"] == activity]
+
+    subset.plot(
+        ax=ax,
+        markersize=25,
+        marker=markers[i],
+        color=colors[i],
+        alpha=0.7,
+        label=activity
+    )
+
+plt.title("Top 5 Business Types in Chicago", fontsize=16)
+plt.legend(title="Business Activity", fontsize=10)
+plt.axis("off")
+plt.show()
 
 
 
